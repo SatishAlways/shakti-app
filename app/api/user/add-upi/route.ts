@@ -4,55 +4,152 @@ import { cookies } from 'next/headers';
 const BACKEND_URL = process.env.BACKEND_API_URL;
 
 export async function POST(request: Request) {
-    const token = cookies().get('auth_token')?.value;
-
-    if (!token) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     try {
-        const { upi, phone } = await request.json();
+        const token = cookies().get('auth_token')?.value;
 
-        // STEP 1: POST /app/ct/app/collection/sendOtp
-        const otpResponse = await fetch(`${BACKEND_URL}/app/ct/app/collection/sendOtp`, {
-            method: 'POST',
-            headers: {
-                Authorization: token,
-                token,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                type: "3",
-                account: phone
-            }),
-        });
-        const otpData = await otpResponse.json();
-
-        if (otpData.code !== 1000) {
-            return NextResponse.json(otpData);
+        if (!token) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            );
         }
 
-        const tempKey = otpData.data.tempKey;
+        const { upi, phone, pin } = await request.json();
 
+        let pinTicket: string | undefined;
 
-        // STEP 2: POST /app/ct/app/collection/v2/submit
-        // Assuming tempKey comes from somewhere or we just proceed
-        const submitResponse = await fetch(`${BACKEND_URL}/app/ct/app/collection/v2/submit`, {
-            method: 'POST',
-            headers: {
-                Authorization: token,
-                token,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                tempKey,
-                upis: [upi]
-            }),
-        });
+        // -------------------------------
+        // STEP 0: Check if PIN required
+        // -------------------------------
+        const checkPinRes = await fetch(
+            `${BACKEND_URL}/app/user/info/checkSendOtp`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: token,
+                    token,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
 
-        const data = await submitResponse.json();
-        return NextResponse.json(data);
+        const checkPinData = await checkPinRes.json();
+
+        if (!checkPinRes.ok) {
+            return NextResponse.json(checkPinData, {
+                status: checkPinRes.status,
+            });
+        }
+
+        // -------------------------------
+        // STEP 1: Verify PIN (if forced)
+        // -------------------------------
+        if (checkPinData?.data?.forcePin) {
+            const verifyPinRes = await fetch(
+                `${BACKEND_URL}/app/user/info/verifyPin`,
+                {
+                    method: 'POST',
+                    headers: {
+                        Authorization: token,
+                        token,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        pin: pin ?? phone.slice(0, 6),
+                    }),
+                }
+            );
+
+            const verifyPinData = await verifyPinRes.json();
+
+            // 🚨 HARD STOP if PIN invalid
+            if (!verifyPinRes.ok || verifyPinData.code !== 1000) {
+                return NextResponse.json(verifyPinData, {
+                    status: verifyPinRes.status || 400,
+                });
+            }
+
+            pinTicket = verifyPinData?.data?.pinTicket;
+
+            if (!pinTicket) {
+                return NextResponse.json(
+                    { code: 500, message: 'PIN ticket missing' },
+                    { status: 500 }
+                );
+            }
+        }
+
+        // -------------------------------
+        // STEP 2: Send OTP
+        // -------------------------------
+        const otpRes = await fetch(
+            `${BACKEND_URL}/app/ct/app/collection/sendOtp`,
+            {
+                method: 'POST',
+                headers: {
+                    Authorization: token,
+                    token,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: '3',
+                    account: phone,
+                    pinTicket,
+                }),
+            }
+        );
+
+        const otpData = await otpRes.json();
+
+        if (!otpRes.ok || otpData.code !== 1000) {
+            return NextResponse.json(otpData, {
+                status: otpRes.status || 400,
+            });
+        }
+
+        const tempKey = otpData?.data?.tempKey;
+
+        if (!tempKey) {
+            return NextResponse.json(
+                { code: 500, message: 'tempKey missing' },
+                { status: 500 }
+            );
+        }
+
+        // -------------------------------
+        // STEP 3: Submit UPI
+        // -------------------------------
+        const submitRes = await fetch(
+            `${BACKEND_URL}/app/ct/app/collection/v2/submit`,
+            {
+                method: 'POST',
+                headers: {
+                    Authorization: token,
+                    token,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    tempKey,
+                    upis: [upi],
+                }),
+            }
+        );
+
+        const submitData = await submitRes.json();
+
+        if (!submitRes.ok) {
+            return NextResponse.json(submitData, {
+                status: submitRes.status,
+            });
+        }
+
+        return NextResponse.json(submitData);
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to add UPI' }, { status: 500 });
+        console.error('Add UPI error:', error);
+
+        return NextResponse.json(
+            { code: 500, message: 'Failed to add UPI' },
+            { status: 500 }
+        );
     }
 }

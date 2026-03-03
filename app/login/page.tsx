@@ -64,7 +64,7 @@ export default function LoginPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
             <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-                <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">Login to Shakti</h2>
+                <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">Login to Diwa</h2>
 
                 {error && (
                     <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">

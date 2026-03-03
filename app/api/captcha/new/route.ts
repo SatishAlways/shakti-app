@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
     const res = await fetch(
-        "https://api.shaktipay.online/app/captcha/new",
+        `${process.env.BACKEND_API_URL}/app/captcha/new`,
         {
             method: "GET",
             cache: "no-store"

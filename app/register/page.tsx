@@ -13,24 +13,12 @@ export default function OTPPage() {
 
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('satish8421'); // default password
-    const [referCode, setReferCode] = useState('1FJE0B');   // default refer code
+    const [referCode, setReferCode] = useState('1o1o1o ?');   // default refer code
     const [otp, setOtp] = useState('');
 
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState('');
     const [error, setError] = useState('');
-
-    useEffect(() => {
-        let deviceId = Cookies.get('deviceId');
-
-        if (!deviceId) {
-            deviceId = crypto.randomUUID();
-            Cookies.set('deviceId', deviceId, {
-                expires: 365, // 1 year
-                sameSite: 'Lax',
-            });
-        }
-    }, []);
 
     useEffect(() => {
         fetchCaptcha();
@@ -267,7 +255,7 @@ export default function OTPPage() {
                             {loading ? 'Verifying...' : 'Verify Captcha'}
                         </button>
 
-
+                        
                         <button
                             type="button"
                             onClick={fetchCaptcha}

@@ -12,6 +12,7 @@ export default function DashboardPage() {
     const [addingUpi, setAddingUpi] = useState(false);
     const [newUpi, setNewUpi] = useState('');
     const [error, setError] = useState('');
+    const [pin, setPin] = useState('');
 
     useEffect(() => {
         fetchData();
@@ -55,7 +56,7 @@ export default function DashboardPage() {
             const phone = sessionStorage.getItem('phone');
             const res = await fetch('/api/user/add-upi', {
                 method: 'POST',
-                body: JSON.stringify({ upi: newUpi, phone }),
+                body: JSON.stringify({ upi: newUpi, phone,pin }),
             });
 
             const data = await res.json();
@@ -64,7 +65,7 @@ export default function DashboardPage() {
                 setAddingUpi(false);
                 fetchData();
             } else {
-                setError(data.error || 'Failed to add UPI');
+                setError(data.error || data.message || 'Failed to add UPI');
             }
         } catch (err) {
             setError('Error adding UPI');
@@ -120,6 +121,11 @@ export default function DashboardPage() {
                     </div>
                 )}
 
+                <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-md">
+                    You PIN IS {sessionStorage.getItem('phone')?.slice(0, 6) ?? wallets[0].phone.slice(0, 6)}
+                </div>
+
+
                 {/* Profile Info */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <h2 className="text-lg font-semibold text-gray-800 mb-4">Profile Information</h2>
@@ -174,7 +180,23 @@ export default function DashboardPage() {
 
                 </div>
 
-
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Enter PIN
+                    </label>
+                    <input
+                        type="text"
+                        maxLength={6}
+                        required
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-black"
+                        placeholder="Enter 6-digit PIN"
+                        value={pin}
+                        onChange={(e) => setPin(e.target.value)}
+                    />
+                    <p className="text-xs text-gray-400 mt-1">
+                        Default PIN is pre-filled. You can change it.
+                    </p>
+                </div>
 
                 {/* Wallets */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 relative">
