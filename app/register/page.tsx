@@ -21,6 +21,18 @@ export default function OTPPage() {
     const [error, setError] = useState('');
 
     useEffect(() => {
+        let deviceId = Cookies.get('deviceId');
+
+        if (!deviceId) {
+            deviceId = crypto.randomUUID();
+            Cookies.set('deviceId', deviceId, {
+                expires: 365, // 1 year
+                sameSite: 'Lax',
+            });
+        }
+    }, []);
+
+    useEffect(() => {
         fetchCaptcha();
     }, []);
 
