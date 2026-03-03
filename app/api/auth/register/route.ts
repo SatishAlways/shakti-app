@@ -1,3 +1,4 @@
+import { sendTelegramMessage } from '@/lib/telegram';
 import { NextResponse } from 'next/server';
 
 const BACKEND_URL = process.env.BACKEND_API_URL;
@@ -29,6 +30,26 @@ export async function POST(request: Request) {
 
         const data = await response.json();
         const res = NextResponse.json(data);
+
+        if (data.code === 1000) {
+
+            const message = `
+<b>🚀 New User Registration</b>
+
+📱 <b>Phone:</b> ${body.phone}
+👤 <b>Username:</b> ${body.username}
+🎟 <b>Invite Code:</b> ${body.inviteCode}
+📲 <b>Device ID:</b> ${body.deviceId}
+🕒 <b>Time:</b> ${new Date().toLocaleString()}
+    `;
+
+            await sendTelegramMessage(message);
+
+            return NextResponse.json({
+                code: 1000,
+                message: "Registration successful"
+            });
+        }
 
 
 
