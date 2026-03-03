@@ -1,0 +1,30 @@
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+
+const BACKEND_URL = process.env.BACKEND_API_URL;
+
+export async function GET() {
+    const token = cookies().get('auth_token')?.value;
+
+    if (!token) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/app/receive/order/history?page=1&size=10`, {
+            method: "GET",
+
+            headers: {
+                Authorization: token,
+                token: token,
+                "Content-Type": "application/json",
+                "user-agent":
+                    "Mozilla/5.0 (Linux; Android 12)",
+            },
+        });
+        const data = await response.json();
+        return NextResponse.json(data);
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });
+    }
+}
