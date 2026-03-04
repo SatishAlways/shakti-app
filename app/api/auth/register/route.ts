@@ -31,25 +31,25 @@ export async function POST(request: Request) {
         const data = await response.json();
         const res = NextResponse.json(data);
 
-        if (data.code === 1000) {
+        // if (data.code === 1000) {
 
-            const message = `
-<b>🚀 New User Registration</b>
+        //     //             const message = `
+        //     // <b>🚀 New User Registration</b>
 
-📱 <b>Phone:</b> ${body.phone}
-👤 <b>Username:</b> ${body.username}
-🎟 <b>Invite Code:</b> ${body.inviteCode}
-📲 <b>Device ID:</b> ${body.deviceId}
-🕒 <b>Time:</b> ${new Date().toLocaleString()}
-    `;
+        //     // 📱 <b>Phone:</b> ${body.phone}
+        //     // 👤 <b>Username:</b> ${body.username}
+        //     // 🎟 <b>Invite Code:</b> ${body.inviteCode}
+        //     // 📲 <b>Device ID:</b> ${body.deviceId}
+        //     // 🕒 <b>Time:</b> ${new Date().toLocaleString()}
+        //     //     `;
 
-            await sendTelegramMessage(message);
+        //     // await sendTelegramMessage(message);
 
-            return NextResponse.json({
-                code: 1000,
-                message: "Registration successful"
-            });
-        }
+        //     return NextResponse.json({
+        //         code: 1000,
+        //         message: "Registration successful"
+        //     });
+        // }
 
 
 
