@@ -92,7 +92,7 @@ export async function POST(request: Request) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    type: '3',
+                    type: '4',
                     account: phone,
                     pinTicket,
                 }),

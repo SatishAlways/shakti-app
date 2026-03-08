@@ -51,74 +51,92 @@ const fetchData = async () => {
     }
 };
 
-const handleAddUpi = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
 
-    try {
-        const phone = sessionStorage.getItem('phone');
+    const handleAddUpi = async (e: React.FormEvent) => {
 
-        const res = await fetch('/api/user/add-upi', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ upi: newUpi, phone, pin }),
-        });
+        e.preventDefault();
+        setLoading(true);
+        setError('');
 
-        const data = await res.json();
+        try {
 
-        if (data.code === 1000 && data?.data?.tempKey) {
-            setTempKey(data.data.tempKey);
-            setAddingUpi(false);
-            setUpiOtp(true);
-        } else {
-            setError(data.error || data.message || 'Failed to add UPI');
+            const phone = sessionStorage.getItem('phone');
+
+            const res = await fetch('/api/user/add-upi', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    upi: newUpi,
+                    phone,
+                    pin
+                })
+            });
+
+            const data = await res.json();
+
+            if (data.code === 1000 && data?.data?.tempKey) {
+
+                setTempKey(data.data.tempKey);
+                setAddingUpi(false);
+                setUpiOtp(true);
+
+            } else {
+                setError(data.error || data.message || 'Failed to add UPI');
+            }
+
+        } catch {
+            setError('Error adding UPI');
+        } finally {
+            setLoading(false);
         }
-    } catch (err) {
-        setError('Error adding UPI');
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
-const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
 
-    try {
-        const res = await fetch('/api/user/verify-upi', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                otp,
-                upi: newUpi,
-                tempKey
-            })
-        });
+    const handleVerifyOtp = async (e: React.FormEvent) => {
 
-        const data = await res.json();
+        e.preventDefault();
 
-        if (data.code === 1000) {
-            setUpiOtp(false);
-            setOtp('');
-            setTempKey('');
-            setNewUpi('');
-            fetchData();
-        } else {
-            setError(data.message || 'OTP verification failed');
+        setLoading(true);
+        setError('');
+
+        try {
+
+            const res = await fetch('/api/user/verify-upi', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    otp,
+                    upi: newUpi,
+                    tempKey
+                })
+            });
+
+            const data = await res.json();
+
+            if (data.code === 1000) {
+
+                setUpiOtp(false);
+                setNewUpi('');
+                setOtp('');
+                setTempKey('');
+
+                fetchData();
+
+            } else {
+                setError(data.message || 'OTP verification failed');
+            }
+
+        } catch {
+            setError('OTP verification error');
+        } finally {
+            setLoading(false);
         }
+    };
 
-    } catch (err) {
-        setError('OTP verification error');
-    } finally {
-        setLoading(false);
-    }
-};
 
 const handleLogout = async () => {
     try {
@@ -167,8 +185,7 @@ return (
             )}
 
             <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-md">
-                You PIN IS {sessionStorage.getItem('phone')?.slice(0, 6) ?? wallets[0].phone.slice(0, 6)}
-            </div>
+You PIN IS {sessionStorage.getItem('phone')?.slice(0, 6) ?? wallets?.[0]?.phone?.slice(0, 6)}            </div>
 
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">Profile Information</h2>
@@ -291,15 +308,16 @@ return (
                             <form onSubmit={handleAddUpi} className="space-y-6">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">UPI Address (VPA)</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        autoFocus
-                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-black"
-                                        placeholder="e.g. username@upi"
-                                        value={newUpi}
-                                        onChange={(e) => setNewUpi(e.target.value)}
-                                    />
+
+                                <input
+                                    type="text"
+                                    placeholder="username@upi"
+                                    className="w-full border p-3 rounded text-black"
+                                    value={newUpi}
+                                    onChange={(e) => setNewUpi(e.target.value)}
+                                />
+
+
                                 </div>
                                 <div className="flex space-x-3">
                                     <button

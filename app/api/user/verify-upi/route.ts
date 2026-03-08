@@ -14,7 +14,9 @@ export async function POST(request: Request) {
             );
         }
 
-        const { upi, otp, tempKey } = await request.json();
+const { upis, otp, tempKey } = await request.json();
+console.log("CHECING UPI")
+console.log(upis)
 
         let pinTicket: string | undefined;
 
@@ -66,10 +68,10 @@ console.log("RUNNING, ADDING UPI.....");
                     token,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    tempKey,
-                    upis: [upi],
-                }),
+body: JSON.stringify({
+    tempKey,
+    upis
+})
             }
         );
 
