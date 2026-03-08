@@ -119,31 +119,31 @@ export async function POST(request: Request) {
         // -------------------------------
         // STEP 3: Submit UPI
         // -------------------------------
-        const submitRes = await fetch(
-            `${BACKEND_URL}/app/ct/app/collection/v2/submit`,
-            {
-                method: 'POST',
-                headers: {
-                    Authorization: token,
-                    token,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    tempKey,
-                    upis: [upi],
-                }),
-            }
-        );
+        // const submitRes = await fetch(
+        //     `${BACKEND_URL}/app/ct/app/collection/v2/submit`,
+        //     {
+        //         method: 'POST',
+        //         headers: {
+        //             Authorization: token,
+        //             token,
+        //             'Content-Type': 'application/json',
+        //         },
+        //         body: JSON.stringify({
+        //             tempKey,
+        //             upis: [upi],
+        //         }),
+        //     }
+        // );
 
-        const submitData = await submitRes.json();
+        // const submitData = await submitRes.json();
 
-        if (!submitRes.ok) {
-            return NextResponse.json(submitData, {
-                status: submitRes.status,
-            });
-        }
+        // if (!submitRes.ok) {
+        //     return NextResponse.json(submitData, {
+        //         status: submitRes.status,
+        //     });
+        // }
 
-        return NextResponse.json(submitData);
+        return NextResponse.json(otpData);
     } catch (error) {
         console.error('Add UPI error:', error);
 

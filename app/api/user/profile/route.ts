@@ -18,8 +18,7 @@ export async function GET() {
                 Authorization: token,
                 token: token,
                 "Content-Type": "application/json",
-                "user-agent":
-                    "Mozilla/5.0 (Linux; Android 12)",
+                "user-agent": "Mozilla/5.0 (Linux; Android 12; SM-A528B Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/110.0.5481.154 Safari/537.36 uni-app Html5Plus/1.0 (Immersed/24.0)",
             },
         });
         const data = await response.json();
